@@ -1,0 +1,3 @@
+[submodule "ext/linode-python"]
+	path = ext/linode-python
+	url = git://github.com/tjfontaine/linode-python.git
