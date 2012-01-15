@@ -15,6 +15,9 @@ from linode.api import Api
 
 API_KEY = os.environ.get('LINODE_API_KEY')
 
+A = 'A'
+AAAA = 'AAAA'
+
 def list_domains(l, args):
     for domain in l.domain_list():
         print domain['DOMAIN']
@@ -28,7 +31,7 @@ def _records_for_domain(l, domain_id, record_type=None):
     all_records = l.domain_resource_list(DomainID=domain_id)
 
     for record in all_records:
-        if record_type and record_type != record['TYPE']:
+        if record_type and record_type != record['TYPE'].upper():
             continue
 
         yield record
@@ -40,7 +43,7 @@ def _add_record(l, domain_id, record_type, **kwargs):
         **kwargs
     )
 
-def _a_record_add(l, domain_id, is_aaaa, args):
+def _a_record_add(l, domain_id, record_type, args):
     if len(args) != 2:
         print "usage"
         sys.exit(1)
@@ -50,7 +53,7 @@ def _a_record_add(l, domain_id, is_aaaa, args):
     _add_record(
         l,
         domain_id,
-        'a' if not is_aaaa else 'aaaa',
+        record_type,
         Name=name,
         Target=ip
     )
@@ -59,7 +62,7 @@ _a_actions = {
     'add': _a_record_add
 }
 
-def _a_record(l, args, is_aaaa=False):
+def _a_record(l, args, record_type):
     if len(args) == 0:
         print "usage"
         sys.exit(1)
@@ -68,7 +71,6 @@ def _a_record(l, args, is_aaaa=False):
     args = args[1:]
 
     domain_id = _domain_id_by_name(l, domain_name)
-    record_type = 'A' if not is_aaaa else 'AAAA'
 
     if len(args) == 0:
         # list all A records
@@ -91,13 +93,13 @@ def _a_record(l, args, is_aaaa=False):
         print "usage"
         sys.exit(1)
 
-    _a_actions[action](l, domain_id, is_aaaa, args)
+    _a_actions[action](l, domain_id, record_type, args)
 
 def a_record(l, args):
-    return _a_record(l, args, is_aaaa=False)
+    return _a_record(l, args, A)
 
 def aaaa_record(l, args):
-    return _a_record(l, args, is_aaaa=True)
+    return _a_record(l, args, AAAA)
 
 _actions = {
     'ls': list_domains,
